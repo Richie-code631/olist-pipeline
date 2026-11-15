@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS core.fact_order_items CASCADE;
+
 -- dim_seller grain: one row per seller
 DROP TABLE IF EXISTS core.dim_seller;
 CREATE TABLE core.dim_seller (
