@@ -20,7 +20,64 @@ All reports are views in the `reports` schema and count only items on `delivered
 - **`customer_orders`:** orders and revenue per real customer (`customer_unique_id`). 2,801 of 93,358 customers (about 3.0%) ordered more than once.
 
 
+## How to run
 
+### Requirements
+- Python 3.10 or later
+- PostgreSQL (tested with 9.15) and a tool to run SQL, such as pgAdmin
+- Git
+
+### 1. Get the project
+```
+git clone https://github.com/https://github.com/Richie-code631/olist-pipeline.git
+cd olist-pipeline
+```
+
+### 2. Create the database and schemas
+In pgAdmin (or `psql`), create a database named `olist_db`. Then open a Query Tool on that database and run:
+```sql
+CREATE SCHEMA raw;
+CREATE SCHEMA core;
+CREATE SCHEMA reports;
+```
+
+### 3. Download the data
+Download the [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) from Kaggle and unzip the nine CSV files into `data/raw/`. The data is licensed CC BY-NC-SA 4.0 and is not included in this repository.
+
+### 4. Configure the database connection
+Copy the example settings file and put your own PostgreSQL password in it:
+```
+copy .env.example .env
+```
+Then open `.env` and replace `your_password_here` with your password. If your user, port or database name differ, change them too. The `.env` file is ignored by Git, so your password is never committed.
+
+### 5. Install the Python packages
+```
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+```
+On macOS or Linux, use `source .venv/bin/activate` and `cp .env.example .env`.
+
+### 6. Run the pipeline
+From the project root, with the environment active:
+```
+python src/run_pipeline.py
+```
+This takes a minute or two. It runs these steps in order:
+1. `src/load_raw.py` loads the nine CSV files into the `raw` schema, as they arrived.
+2. `sql/core_dimensions.sql` rebuilds the star schema in `core`: four dimensions and the fact table.
+3. `sql/reports.sql` recreates the report views in `reports`.
+
+The pipeline can be run again at any time. Each run drops and rebuilds the tables and views.
+
+### 7. Check the result
+Run `sql/checks_core.sql` in pgAdmin. Expected results:
+- `core.fact_order_items` has 112,650 rows
+- total price is 13,591,643.70 in both `raw.order_items` and `core.fact_order_items`
+- 8 items are flagged with `delivery_date_missing`
+
+The sum of `revenue` in each report view is 13,221,498.11 (delivered orders only).
 
 
 
