@@ -9,4 +9,20 @@
 
 ## Revenue rule
 
-Only items on orders with status delivered count as revenue. This excludes about 370,000 of price (370,145.59) in canceled, unavailable and in-progress orders. Reason: This is to maintain and constrict revenue to only completed sales so that orders that were canceled, are unavailable, or may still schange are not counted in the 'price' measure.
+Only items on orders with status `delivered` count as revenue. This excludes about 370,000 of price (370,145.59) in canceled, unavailable and in-progress orders. Reason: revenue should include only completed sales, so orders that were canceled, are unavailable, or may still change are not counted in the `price` measure.
+
+## Reports
+
+All reports are views in the `reports` schema and count only items on `delivered` orders (see Revenue rule).
+
+- **`revenue_by_category_month`:** revenue and items sold per product category per month. Products with no category are shown as "unknown".
+- **`revenue_by_sellers_month`:** revenue and items sold per seller per month, using only the fact table, `dim_seller` and `dim_date`.
+- **`customer_orders`:** orders and revenue per real customer (`customer_unique_id`). 2,801 of 93,358 customers (about 3.0%) ordered more than once.
+
+
+
+
+
+
+
+
